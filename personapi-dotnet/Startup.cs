@@ -34,6 +34,8 @@ namespace personapi_dotnet
          services.AddControllersWithViews();
          services.AddScoped<IPersonaRepository, PersonaRepository>();
          services.AddScoped<ITelefonoRepository, TelefonoRepository> ();
+         services.AddScoped<IEstudioRepository, EstudioRepository>();
+         services.AddScoped<IProfesionRepository, ProfesionRepository>();
          services.AddSwaggerGen();
     }
 
