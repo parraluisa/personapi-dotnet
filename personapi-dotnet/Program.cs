@@ -2,8 +2,12 @@
 using Microsoft.Extensions.Configuration;
 using personapi_dotnet.Models.Entities;
 using personapi_dotnet.Controllers;
+using personapi_dotnet;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var startup = new Startup(builder.Configuration);
+startup.ConfigureServices(builder.Services);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();

@@ -33,9 +33,9 @@ namespace personapi_dotnet
 
          services.AddControllersWithViews();
          services.AddScoped<IPersonaRepository, PersonaRepository>();
-         services.AddScoped<ITelefonoRepository, TelefonoRepository>();
+         services.AddScoped<ITelefonoRepository, TelefonoRepository> ();
          services.AddSwaggerGen();
-        }
+    }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
