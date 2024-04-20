@@ -29,3 +29,4 @@ services:
       - sqllog:/var/opt/sqlserver/log
       - sqlbackup:/var/opt/sqlserver/backup
       - /c/docker/shared:/usr/shared
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
