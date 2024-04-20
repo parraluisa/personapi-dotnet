@@ -1,61 +1,156 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using personapi_dotnet.Controllers.Interfaces;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using personapi_dotnet.Models.Entities;
 
 namespace personapi_dotnet.Controllers
 {
-    [Route("api/personas")]
-    [ApiController]
-    public class PersonaController : ControllerBase
+    public class PersonasController : Controller
     {
-        private readonly IPersonaRepository _personaRepository;
+        private readonly PersonaDbContext _context;
 
-        public PersonaController(IPersonaRepository personaRepository)
+        public PersonasController(PersonaDbContext context)
         {
-            _personaRepository = personaRepository;
+            _context = context;
         }
 
-        [HttpGet]
-        public IActionResult GetAll()
+        // GET: Personas
+        public async Task<IActionResult> Index()
         {
-            var personas = _personaRepository.GetAll();
-            return Ok(personas);
+            return View(await _context.Personas.ToListAsync());
         }
 
-        [HttpGet("{id}")]
-        public IActionResult GetById(int id)
+        // GET: Personas/Details/5
+        public async Task<IActionResult> Details(int? id)
         {
-            var persona = _personaRepository.GetById(id);
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var persona = await _context.Personas
+                .FirstOrDefaultAsync(m => m.Cc == id);
             if (persona == null)
             {
                 return NotFound();
             }
-            return Ok(persona);
+
+            return View(persona);
         }
 
-        [HttpPost]
-        public IActionResult Create(Persona persona)
+        // GET: Personas/Create
+        public IActionResult Create()
         {
-            _personaRepository.Add(persona);
-            return CreatedAtAction(nameof(GetById), new { id = persona.Cc }, persona);
+            return View();
         }
 
-        [HttpPut("{id}")]
-        public IActionResult Update(int id, Persona persona)
+        // POST: Personas/Create
+        // To protect from overposting attacks, enable the specific properties you want to bind to.
+        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create([Bind("Cc,Nombre,Apellido,Genero,Edad")] Persona persona)
+        {
+            if (ModelState.IsValid)
+            {
+                _context.Add(persona);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            return View(persona);
+        }
+
+        // GET: Personas/Edit/5
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var persona = await _context.Personas.FindAsync(id);
+            if (persona == null)
+            {
+                return NotFound();
+            }
+            return View(persona);
+        }
+
+        // POST: Personas/Edit/5
+        // To protect from overposting attacks, enable the specific properties you want to bind to.
+        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, [Bind("Cc,Nombre,Apellido,Genero,Edad")] Persona persona)
         {
             if (id != persona.Cc)
             {
-                return BadRequest();
+                return NotFound();
             }
-            _personaRepository.Update(persona);
-            return NoContent();
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    _context.Update(persona);
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!PersonaExists(persona.Cc))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+                return RedirectToAction(nameof(Index));
+            }
+            return View(persona);
         }
 
-        [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        // GET: Personas/Delete/5
+        public async Task<IActionResult> Delete(int? id)
         {
-            _personaRepository.Delete(id);
-            return NoContent();
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var persona = await _context.Personas
+                .FirstOrDefaultAsync(m => m.Cc == id);
+            if (persona == null)
+            {
+                return NotFound();
+            }
+
+            return View(persona);
+        }
+
+        // POST: Personas/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var persona = await _context.Personas.FindAsync(id);
+            if (persona != null)
+            {
+                _context.Personas.Remove(persona);
+            }
+
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+
+        private bool PersonaExists(int id)
+        {
+            return _context.Personas.Any(e => e.Cc == id);
         }
     }
 }

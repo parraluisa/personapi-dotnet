@@ -1,7 +1,7 @@
-﻿using personapi_dotnet.Controllers.Interfaces;
+﻿using personapi_dotnet.Interfaces;
 using personapi_dotnet.Models.Entities;
 
-namespace personapi_dotnet.Controllers.Repositories
+namespace personapi_dotnet.Repositories
 {
     public class PersonaRepository : IPersonaRepository
     {
