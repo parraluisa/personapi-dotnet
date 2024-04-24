@@ -2,7 +2,7 @@
 using personapi_dotnet.Interfaces;
 using personapi_dotnet.Models.Entities;
 
-namespace personapi_dotnet.Controllers
+namespace personapi_dotnet.Controllers.api
 {
 
     [Produces("application/json")]

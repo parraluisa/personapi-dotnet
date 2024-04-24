@@ -362,3 +362,5 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /sapassword.env
+/personapi-dotnet/Models/Entities/PersonaDbContext.cs
+/personapi-dotnet/appsettings.json

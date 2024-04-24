@@ -2,13 +2,14 @@
 using personapi_dotnet.Interfaces;
 using personapi_dotnet.Models.Entities;
 
-namespace personapi_dotnet.Controllers
+namespace personapi_dotnet.Controllers.api
 {
     [Route("api/profesiones")]
     public class APIProfesionesController : ControllerBase
     {
-        private readonly IProfesionRepository _profesionRepository; 
-        public APIProfesionesController(IProfesionRepository profesionRepository) { 
+        private readonly IProfesionRepository _profesionRepository;
+        public APIProfesionesController(IProfesionRepository profesionRepository)
+        {
             _profesionRepository = profesionRepository;
         }
 

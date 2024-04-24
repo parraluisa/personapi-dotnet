@@ -4,7 +4,7 @@ using personapi_dotnet.Interfaces;
 using personapi_dotnet.Models.Entities;
 using RouteAttribute = Microsoft.AspNetCore.Mvc.RouteAttribute;
 
-namespace personapi_dotnet.Controllers
+namespace personapi_dotnet.Controllers.api
 {
     [Route("api/estudios")]
     [ApiController]
