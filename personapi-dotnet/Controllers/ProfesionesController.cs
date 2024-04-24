@@ -55,6 +55,16 @@ namespace personapi_dotnet.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Nom,Des")] Profesion profesion)
         {
+            // Verificar si el teléfono ya existe
+            bool profesionExiste = await _context.Profesions
+                .AnyAsync(t => t.Id == profesion.Id);
+
+            // Si el teléfono ya existe, se muestra en la pantalla
+            if (profesionExiste)
+            {
+                ModelState.AddModelError("Id", "El id de profesión ya existe.");
+            }
+
             if (ModelState.IsValid)
             {
                 _context.Add(profesion);
