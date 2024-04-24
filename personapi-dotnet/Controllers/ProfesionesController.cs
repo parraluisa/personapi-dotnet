@@ -64,13 +64,19 @@ namespace personapi_dotnet.Controllers
             {
                 ModelState.AddModelError("Id", "El id de profesión ya existe.");
             }
-
-            if (ModelState.IsValid)
+            else
             {
-                _context.Add(profesion);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                ModelState.Clear();
+
+                if (ModelState.IsValid)
+                {
+                    _context.Add(profesion);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
             }
+
+            
             return View(profesion);
         }
 
@@ -148,15 +154,31 @@ namespace personapi_dotnet.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
+            // Encontrar la profesión por su ID
             var profesion = await _context.Profesions.FindAsync(id);
             if (profesion != null)
             {
+                // Buscar todos los estudios asociados con esta profesión
+                var estudiosAsociados = await _context.Estudios
+                    .Where(e => e.IdProf == id)
+                    .ToListAsync();
+
+                // Eliminar todos los estudios asociados
+                if (estudiosAsociados.Any())
+                {
+                    _context.Estudios.RemoveRange(estudiosAsociados);
+                }
+
+                // Luego eliminar la profesión
                 _context.Profesions.Remove(profesion);
+
+                // Guardar cambios
+                await _context.SaveChangesAsync();
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
+
 
         private bool ProfesionExists(int id)
         {

@@ -55,6 +55,18 @@ namespace personapi_dotnet.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Cc,Nombre,Apellido,Genero,Edad")] Persona persona)
         {
+            bool ccExiste = await _context.Personas.AnyAsync( p=>
+             p.Cc == persona.Cc  
+                );
+            if (ccExiste)
+            {
+                ModelState.AddModelError("Cc", "El número de teléfono ya existe.");
+            }
+            else
+            {
+                ModelState.Clear();
+            }
+            
             if (ModelState.IsValid)
             {
                 _context.Add(persona);
@@ -138,11 +150,27 @@ namespace personapi_dotnet.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var persona = await _context.Personas.FindAsync(id);
-            if (persona != null)
+            var persona = await _context.Personas.Include(p => p.Telefonos).Include(p => p.Estudios).FirstOrDefaultAsync(p => p.Cc == id);
+
+            if (persona == null)
             {
-                _context.Personas.Remove(persona);
+                return NotFound();
             }
+
+            // Eliminar todos los teléfonos asociados a la persona
+            foreach (var telefono in persona.Telefonos)
+            {
+                _context.Telefonos.Remove(telefono);
+            }
+
+            // Eliminar todos los estudios asociados a la persona
+            foreach (var estudio in persona.Estudios)
+            {
+                _context.Estudios.Remove(estudio);
+            }
+
+            // Ahora puedes eliminar la persona
+            _context.Personas.Remove(persona);
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));

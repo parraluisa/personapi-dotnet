@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace personapi_dotnet.Models.Entities;
 
@@ -11,6 +12,8 @@ public partial class Persona
 
     public string Apellido { get; set; } = null!;
 
+    [Required]
+    [RegularExpression("^[MF]$", ErrorMessage = "El género debe ser 'F' para femenino o 'M' para masculino.")]
     public string Genero { get; set; } = null!;
 
     public int? Edad { get; set; }

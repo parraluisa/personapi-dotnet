@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using Microsoft.EntityFrameworkCore;
-using static System.Net.Mime.MediaTypeNames;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace personapi_dotnet.Models.Entities;
 
@@ -48,12 +45,12 @@ public partial class PersonaDbContext : DbContext
 
             entity.HasOne(d => d.CcPerNavigation).WithMany(p => p.Estudios)
                 .HasForeignKey(d => d.CcPer)
-                .OnDelete(DeleteBehavior.Cascade)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__estudios__cc_per__398D8EEE");
 
             entity.HasOne(d => d.IdProfNavigation).WithMany(p => p.Estudios)
                 .HasForeignKey(d => d.IdProf)
-                .OnDelete(DeleteBehavior.Cascade)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__estudios__id_pro__3A81B327");
         });
 
@@ -118,8 +115,8 @@ public partial class PersonaDbContext : DbContext
 
             entity.HasOne(d => d.DuenioNavigation).WithMany(p => p.Telefonos)
                 .HasForeignKey(d => d.Duenio)
-                .HasConstraintName("FK__telefono__duenio__34C8D9D1")
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__telefono__duenio__34C8D9D1");
         });
 
         OnModelCreatingPartial(modelBuilder);
