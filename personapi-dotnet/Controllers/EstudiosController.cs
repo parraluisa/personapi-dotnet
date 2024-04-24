@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.ConstrainedExecution;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -60,26 +61,55 @@ namespace personapi_dotnet.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("IdProf,CcPer,Fecha,Univer")] Estudio estudio)
         {
-            if (ModelState.IsValid)
+
+            bool profPerExiste = await _context.Estudios
+                .AnyAsync(p => p.IdProf == estudio.IdProf && p.CcPer == estudio.CcPer);
+
+            // Si el teléfono ya existe, se muestra en la pantalla
+            if (profPerExiste)
             {
-                _context.Add(estudio);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                Console.WriteLine("El prof con per ya está");
+                ModelState.AddModelError("CcPer", "La profesión para esa persona ya existe.");
             }
+            else
+            {
+                var profesion = await _context.Profesions.FirstOrDefaultAsync(m =>
+                    m.Id == estudio.IdProf
+                );
+                estudio.IdProfNavigation = profesion;
+
+                var persona = await _context.Personas.FirstOrDefaultAsync(m =>
+                     m.Cc == estudio.CcPer
+                );
+                estudio.CcPerNavigation = persona;
+
+                ModelState.Clear();
+                TryValidateModel(estudio);
+
+                if (ModelState.IsValid)
+                {
+                    _context.Add(estudio);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
+
+            }
+
             ViewData["CcPer"] = new SelectList(_context.Personas, "Cc", "Cc", estudio.CcPer);
             ViewData["IdProf"] = new SelectList(_context.Profesions, "Id", "Id", estudio.IdProf);
             return View(estudio);
         }
 
         // GET: Estudios/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> Edit(int? IdProf, int? CcPer)
         {
-            if (id == null)
+            if (IdProf == null || CcPer == null)
             {
                 return NotFound();
             }
+            var estudio = await _context.Estudios
+            .FirstOrDefaultAsync(e => e.IdProf == IdProf && e.CcPer == CcPer);
 
-            var estudio = await _context.Estudios.FindAsync(id);
             if (estudio == null)
             {
                 return NotFound();
@@ -94,12 +124,25 @@ namespace personapi_dotnet.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("IdProf,CcPer,Fecha,Univer")] Estudio estudio)
+        public async Task<IActionResult> Edit(int IdProf, int CcPer, [Bind("IdProf,CcPer,Fecha,Univer")] Estudio estudio)
         {
-            if (id != estudio.IdProf)
+            if (IdProf != estudio.IdProf || CcPer != estudio.CcPer)
             {
                 return NotFound();
             }
+
+            var profesion = await _context.Profesions.FirstOrDefaultAsync(m =>
+                    m.Id == estudio.IdProf
+                );
+            estudio.IdProfNavigation = profesion;
+
+            var persona = await _context.Personas.FirstOrDefaultAsync(m =>
+                 m.Cc == estudio.CcPer
+            );
+            estudio.CcPerNavigation = persona;
+
+            ModelState.Clear();
+            TryValidateModel(estudio);
 
             if (ModelState.IsValid)
             {
@@ -110,7 +153,7 @@ namespace personapi_dotnet.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!EstudioExists(estudio.IdProf))
+                    if (!EstudioExists(estudio.IdProf, estudio.CcPer))
                     {
                         return NotFound();
                     }
@@ -127,9 +170,9 @@ namespace personapi_dotnet.Controllers
         }
 
         // GET: Estudios/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Delete(int? Idprof, int? CcPer)
         {
-            if (id == null)
+            if (Idprof == null || CcPer == null)
             {
                 return NotFound();
             }
@@ -137,7 +180,7 @@ namespace personapi_dotnet.Controllers
             var estudio = await _context.Estudios
                 .Include(e => e.CcPerNavigation)
                 .Include(e => e.IdProfNavigation)
-                .FirstOrDefaultAsync(m => m.IdProf == id);
+                .FirstOrDefaultAsync(m => m.IdProf == Idprof && m.CcPer == CcPer);
             if (estudio == null)
             {
                 return NotFound();
@@ -149,9 +192,10 @@ namespace personapi_dotnet.Controllers
         // POST: Estudios/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(int IdProf, int CcPer)
         {
-            var estudio = await _context.Estudios.FindAsync(id);
+            var estudio = await _context.Estudios
+                .FirstOrDefaultAsync(e => e.IdProf == IdProf && e.CcPer == CcPer);
             if (estudio != null)
             {
                 _context.Estudios.Remove(estudio);
@@ -161,9 +205,9 @@ namespace personapi_dotnet.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        private bool EstudioExists(int id)
+        private bool EstudioExists(int IdProf, int CcPer )
         {
-            return _context.Estudios.Any(e => e.IdProf == id);
+            return _context.Estudios.Any(e => e.IdProf == IdProf && e.CcPer == CcPer);
         }
     }
 }
