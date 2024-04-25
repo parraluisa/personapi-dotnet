@@ -72,22 +72,38 @@ namespace personapi_dotnet.Controllers.api
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
-            var profesion = _profesionRepository.GetById(id);
-            if (profesion == null)
+            try
             {
-                return NotFound();
-            }
-
-            var estudios = _estudioRepository.GetAllByIdProf(id);
-
-            if (estudios.Any())
-            {
-                foreach (var estudio in estudios)
+                var profesion = _profesionRepository.GetById(id);
+                if (profesion == null)
                 {
-                    _estudioRepository.Delete(estudio.CcPer, estudio.IdProf);
+                    return NotFound();
                 }
+            }catch (Exception ex)
+            {
+
             }
-            
+
+
+            try
+            {
+
+                var estudios = _estudioRepository.GetAllByIdProf(id);
+
+                if (estudios.Any())
+                {
+                    foreach (var estudio in estudios)
+                    {
+                        _estudioRepository.Delete(estudio.CcPer, estudio.IdProf);
+                    }
+                }
+
+            } catch (Exception ex)
+            {
+
+            }
+
+
             _profesionRepository.Delete(id);
 
             return NoContent(); 

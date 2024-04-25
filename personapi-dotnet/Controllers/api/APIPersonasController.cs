@@ -94,27 +94,38 @@ namespace personapi_dotnet.Controllers.api
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
-
-            var telefonos = _telefonoRepository.GetByDuenio(id);
-
-            if (telefonos.Any())
+            try
             {
-                List<string> phoneNumbersToDelete = telefonos.Select(t => t.Num).ToList();
-                foreach (var phoneNumber in phoneNumbersToDelete)
+                var telefonos = _telefonoRepository.GetByDuenio(id);
+                if (telefonos.Any())
                 {
-                    _telefonoRepository.Delete(phoneNumber);
+                    List<string> phoneNumbersToDelete = telefonos.Select(t => t.Num).ToList();
+                    foreach (var phoneNumber in phoneNumbersToDelete)
+                    {
+                        _telefonoRepository.Delete(phoneNumber);
+                    }
+
                 }
+            } catch (Exception ex)
+            {
 
             }
 
-            var estudios = _estudioRepository.GetAllByCcPer(id);
-            if(estudios.Any())
+            try
             {
-                List<int> studies = estudios.Select(t => t.CcPer).ToList();
-                foreach (var estudio in estudios)
+                var estudios = _estudioRepository.GetAllByCcPer(id);
+                if (estudios.Any())
                 {
-                    _estudioRepository.Delete(estudio.CcPer, estudio.IdProf);
+                    List<int> studies = estudios.Select(t => t.CcPer).ToList();
+                    foreach (var estudio in estudios)
+                    {
+                        _estudioRepository.Delete(estudio.CcPer, estudio.IdProf);
+                    }
                 }
+
+            } catch (Exception e)
+            {
+
             }
 
             _personaRepository.Delete(id);
