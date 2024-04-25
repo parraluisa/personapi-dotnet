@@ -28,6 +28,16 @@ namespace personapi_dotnet.Repositories
             return null;
         }
 
+        public IEnumerable<Telefono> GetByDuenio(int id)
+        {
+            var telefonos = _context.Telefonos.Where(t => t.Duenio == id);
+            if (telefonos.Any())
+            {
+                return telefonos;
+            }
+            return null;
+        }
+
         public void Add(Telefono telefono)
         {
             _context.Telefonos.Add(telefono);

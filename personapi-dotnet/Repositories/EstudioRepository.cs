@@ -26,6 +26,27 @@ namespace personapi_dotnet.Repositories
             return null;
         }
 
+        public IEnumerable<Estudio> GetAllByIdProf(int idProf)
+        {
+            var estudios = _context.Estudios.Where(e => e.IdProf == idProf).ToList();
+            if (estudios.Any())
+            {
+                return estudios;
+            }
+            return null;
+            
+        }
+        public IEnumerable<Estudio> GetAllByCcPer(int CcPer)
+        {
+            var estudios = _context.Estudios.Where(e => e.CcPer == CcPer).ToList();
+            if (estudios.Any())
+            {
+                return estudios;
+            }
+            return null;
+
+        }
+
         public void Add(Estudio estudio)
         {
             _context.Estudios.Add(estudio);
