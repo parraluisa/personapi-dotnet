@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using personapi_dotnet.Interfaces;
 using personapi_dotnet.Models.Entities;
+using personapi_dotnet.Repositories;
 
 namespace personapi_dotnet.Controllers.api
 {
@@ -11,10 +12,14 @@ namespace personapi_dotnet.Controllers.api
     public class APIPersonaController : ControllerBase
     {
         private readonly IPersonaRepository _personaRepository;
+        private readonly ITelefonoRepository _telefonoRepository;
+        private readonly IEstudioRepository _estudioRepository;
 
-        public APIPersonaController(IPersonaRepository personaRepository)
+        public APIPersonaController(IPersonaRepository personaRepository, ITelefonoRepository telefonoRepository, IEstudioRepository estudioRepository)
         {
             _personaRepository = personaRepository;
+            _telefonoRepository = telefonoRepository;
+            _estudioRepository = estudioRepository;
         }
 
         [HttpGet]
@@ -56,6 +61,29 @@ namespace personapi_dotnet.Controllers.api
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
+
+            var telefonos = _telefonoRepository.GetByDuenio(id);
+
+            if (telefonos.Any())
+            {
+                List<string> phoneNumbersToDelete = telefonos.Select(t => t.Num).ToList();
+                foreach (var phoneNumber in phoneNumbersToDelete)
+                {
+                    _telefonoRepository.Delete(phoneNumber);
+                }
+
+            }
+
+            var estudios = _estudioRepository.GetAllByCcPer(id);
+            if(estudios.Any())
+            {
+                List<int> studies = estudios.Select(t => t.CcPer).ToList();
+                foreach (var estudio in estudios)
+                {
+                    _estudioRepository.Delete(estudio.CcPer, estudio.IdProf);
+                }
+            }
+
             _personaRepository.Delete(id);
             return NoContent();
         }

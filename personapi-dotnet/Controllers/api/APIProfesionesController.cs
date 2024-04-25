@@ -8,9 +8,12 @@ namespace personapi_dotnet.Controllers.api
     public class APIProfesionesController : ControllerBase
     {
         private readonly IProfesionRepository _profesionRepository;
-        public APIProfesionesController(IProfesionRepository profesionRepository)
+        private readonly IEstudioRepository _estudioRepository;
+
+        public APIProfesionesController(IProfesionRepository profesionRepository, IEstudioRepository estudioRepository)
         {
             _profesionRepository = profesionRepository;
+            _estudioRepository = estudioRepository;
         }
 
         [HttpGet]
@@ -52,8 +55,25 @@ namespace personapi_dotnet.Controllers.api
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
+            var profesion = _profesionRepository.GetById(id);
+            if (profesion == null)
+            {
+                return NotFound();
+            }
+
+            var estudios = _estudioRepository.GetAllByIdProf(id);
+
+            if (estudios.Any())
+            {
+                foreach (var estudio in estudios)
+                {
+                    _estudioRepository.Delete(estudio.CcPer, estudio.IdProf);
+                }
+            }
+            
             _profesionRepository.Delete(id);
-            return NoContent();
+
+            return NoContent(); 
         }
 
     }
