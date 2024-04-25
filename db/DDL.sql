@@ -1,9 +1,11 @@
+CREATE DATABASE persona_db;
+use persona_db;
 -- Crear tabla persona
 CREATE TABLE persona (
   cc int PRIMARY KEY NOT NULL,
   nombre varchar(45) NOT NULL,
   apellido varchar(45) NOT NULL,
-  genero CHAR(1) NOT NULL CHECK (genero IN ('F', 'M')), -- Restricción de verificación para género
+  genero CHAR(1) NOT NULL CHECK (genero IN ('F', 'M')), -- RestricciÃ³n de verificaciÃ³n para gÃ©nero
   edad int
 );
 
