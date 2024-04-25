@@ -39,15 +39,32 @@ namespace personapi_dotnet.Controllers.api
         }
 
         [HttpPut("{id}")]
-        public IActionResult Update(int id, Profesion profesion)
+        public IActionResult Update(int id, string nombre, string descripcion)
         {
-            if (id != profesion.Id)
+            // Obtener la profesión existente de la base de datos
+            var profesion = _profesionRepository.GetById(id);
+            if (profesion == null)
             {
-                return BadRequest();
+                return NotFound();
             }
+
+            // Actualizar las propiedades de la profesión existente
+            if(nombre != null)
+            {
+                profesion.Nom = nombre;
+            }
+
+            if(descripcion != null)
+            {
+                profesion.Des = descripcion;
+            }
+
+            // Guardar los cambios en la base de datos
             _profesionRepository.Update(profesion);
+
             return NoContent();
         }
+
 
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)

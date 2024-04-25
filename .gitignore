@@ -364,3 +364,5 @@ FodyWeavers.xsd
 /sapassword.env
 /personapi-dotnet/Models/Entities/PersonaDbContext.cs
 /personapi-dotnet/appsettings.json
+/personapi-dotnet/Models/Entities/PersonaDbContext.cs
+/personapi-dotnet/appsettings.json

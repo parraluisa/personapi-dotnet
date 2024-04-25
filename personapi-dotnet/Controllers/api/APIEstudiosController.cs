@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using System.Runtime.ConstrainedExecution;
+using System.Text.Json.Serialization;
+using System.Text.Json;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Mvc;
 using personapi_dotnet.Interfaces;
 using personapi_dotnet.Models.Entities;
@@ -11,10 +14,14 @@ namespace personapi_dotnet.Controllers.api
     public class APIEstudiosController : ControllerBase
     {
         private readonly IEstudioRepository _estudioRepository;
+        private readonly IProfesionRepository _profesionRepository;
+        private readonly IPersonaRepository _personaRepository;
 
-        public APIEstudiosController(IEstudioRepository estudioRepository)
+        public APIEstudiosController(IEstudioRepository estudioRepository, IProfesionRepository profesionRepository, IPersonaRepository personaRepository)
         {
             _estudioRepository = estudioRepository;
+            _profesionRepository = profesionRepository;
+            _personaRepository = personaRepository;
         }
 
         [HttpGet]
@@ -35,22 +42,81 @@ namespace personapi_dotnet.Controllers.api
         }
 
         [HttpPost]
-        public IActionResult Create(Estudio estudio)
+        public IActionResult Create(int id_profesion, int cc_persona, DateOnly date, string universidad)
         {
-            _estudioRepository.Add(estudio);
-            return CreatedAtAction(nameof(GetById), new { ccPer = estudio.CcPer, idProf = estudio.IdProf }, estudio);
+            // Verificar si el estudio ya existe
+            var existingEstudio = _estudioRepository.GetById(cc_persona, id_profesion);
+
+            if (existingEstudio != null)
+            {
+                return Conflict("El estudio ya existe para esta persona y profesión.");
+            }
+
+            // Crear un nuevo objeto Estudio
+            var estudio = new Estudio
+            {
+                IdProf = id_profesion,
+                CcPer = cc_persona,
+                Fecha = date,
+                Univer = universidad
+            };
+
+            // Agregar el estudio a la lista de estudios de la persona
+            var persona = _personaRepository.GetById(cc_persona);
+            persona.Estudios.Add(estudio);
+            _personaRepository.Update(persona);
+
+            // Agregar el estudio a la lista de estudios de la profesion
+            var profesion = _profesionRepository.GetById(id_profesion);
+            profesion.Estudios.Add(estudio);
+            _profesionRepository.Update(profesion);
+
+
+            // Configurar las opciones de serialización para evitar ciclos de referencias
+            var options = new JsonSerializerOptions
+            {
+                ReferenceHandler = ReferenceHandler.Preserve
+            };
+
+            // Serializar el estudio con las opciones configuradas
+            var serializedEstudio = JsonSerializer.Serialize(estudio, options);
+
+            // Devolver una respuesta exitosa con el estudio creado
+            return CreatedAtAction(nameof(GetById), new { ccPer = estudio.CcPer, idProf = estudio.IdProf }, serializedEstudio);
         }
 
+
         [HttpPut("{ccPer}/{idProf}")]
-        public IActionResult Update(int ccPer, int idProf, Estudio estudio)
+        public IActionResult Update(int ccPer, int idProf, string universidad, DateOnly date)
         {
-            if (ccPer != estudio.CcPer || idProf != estudio.IdProf)
+            // Obtener el estudio a actualizar
+            var estudio = _estudioRepository.GetById(ccPer, idProf);
+
+            // Verificar si el estudio existe
+            if (estudio == null)
             {
-                return BadRequest();
+                return NotFound();
             }
+
+            // Actualizar los campos de universidad si no están vacíos
+            if (!string.IsNullOrEmpty(universidad))
+            {
+                estudio.Univer = universidad;
+            }
+
+            // Actualizar el campo de fecha si no está vacío
+            if (date != default)
+            {
+                estudio.Fecha = date;
+            }
+
+            // Actualizar el estudio en el repositorio
             _estudioRepository.Update(estudio);
+
             return NoContent();
         }
+
+
 
         [HttpDelete("{ccPer}/{idProf}")]
         public IActionResult Delete(int ccPer, int idProf)

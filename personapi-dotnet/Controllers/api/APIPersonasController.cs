@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Runtime.ConstrainedExecution;
+using Microsoft.AspNetCore.Mvc;
 using personapi_dotnet.Interfaces;
 using personapi_dotnet.Models.Entities;
 
@@ -36,22 +37,54 @@ namespace personapi_dotnet.Controllers.api
         }
 
         [HttpPost]
-        public IActionResult Create(Persona persona)
+        public IActionResult Create(int cc, string nombre, string apellido, string genero, int edad)
         {
+            var persona = new Persona
+            {
+                Cc = cc,
+                Nombre = nombre,
+                Apellido = apellido,
+                Genero = genero,
+                Edad = edad,
+            };
             _personaRepository.Add(persona);
             return CreatedAtAction(nameof(GetById), new { id = persona.Cc }, persona);
         }
 
         [HttpPut("{id}")]
-        public IActionResult Update(int id, Persona persona)
+        public IActionResult Update(int id, string nombre = null, string apellido = null, string genero = null, int edad = 0)
         {
+            var persona = _personaRepository.GetById(id);
+
             if (id != persona.Cc)
             {
                 return BadRequest();
             }
+
+            if (nombre != null)
+            {
+                persona.Nombre = nombre;
+            }
+
+            if (apellido != null)
+            {
+                persona.Apellido = apellido;
+            }
+
+            if (genero != null)
+            {
+                persona.Genero = genero;
+            }
+
+            if (edad != 0)
+            {
+                persona.Edad = edad;
+            }
+
             _personaRepository.Update(persona);
             return NoContent();
         }
+
 
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
