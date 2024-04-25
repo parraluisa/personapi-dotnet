@@ -1,7 +1,8 @@
+use persona_db;
 INSERT INTO persona (cc, nombre, apellido, genero, edad) VALUES
-(123456789, 'MarÌa', 'Gonz·lez', 'F', 25),
-(987654321, 'Juan', 'MartÌnez', 'M', 30),
-(111222333, 'Ana', 'LÛpez', 'F', 40);
+(123456789, 'Mar√≠a', 'Gonz√°lez', 'F', 25),
+(987654321, 'Juan', 'Mart√≠nez', 'M', 30),
+(111222333, 'Ana', 'L√≥pez', 'F', 40);
  
 
 INSERT INTO telefono (num, oper, duenio) VALUES
@@ -12,7 +13,7 @@ INSERT INTO telefono (num, oper, duenio) VALUES
  
 INSERT INTO profesion (id, nom, des) VALUES
 (1, 'Ingeniero', 'Ingeniero en Sistemas'),
-(2, 'Doctor', 'MÈdico Cirujano'),
+(2, 'Doctor', 'M√©dico Cirujano'),
 (3, 'Abogado', 'Especialista en Derecho Civil');
  
  
